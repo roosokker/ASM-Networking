@@ -11,37 +11,17 @@ include irvine32.inc
 ;------------ end of inputs DATA -------
 
 
-;------------ Esubstitute DATA ---------------
-         ;write data here
-;----------- end of Esubstitute DATA ---------
+;------------ Encrypt DATA -------------
 
-
-;----------- Eshiftrows DATA ------------------
-         ;write data here
-;----------- end of Eshiftrows DATA -----------
-
-
-;----------- Eaddmatrix DATA ------------------
-         ;write data here
-;----------- end of Eaddmatrix DATA ------------
+;------------End of Encrypt DATA--------
 
 
 
 ;DATA FOR DECRYPTION
-;------------ Dsubstitute DATA ---------------
-         ;write data here
-;----------- end of Dsubstitute DATA ---------
 
+;-------------Decrypt DATA----------------
 
-;----------- Dshiftrows DATA ------------------
-         ;write data here
-;----------- end of Dshiftrows DATA -----------
-
-
-;----------- Daddmatrix DATA ------------------
-         ;write data here
-;----------- end of Daddmatrix DATA ------------
-
+;------------End of Decrypt DATA----------
 
 .code
 
@@ -65,72 +45,36 @@ inputs PROC
 
    mov esi , offset text
    mov edi , offset key
-   mov ebx , offset textXkey
+   mov edx , offset textXkey
    mov ecx , lengthof text
    XORinputs:
                mov ebx , [esi]
 			   xor ebx , [edi]
-			   mov ebx , ebx
+			   mov [edx] , ebx
 			   add esi , 4
 			   add edi , 4
-			   add ebx , 4
+			   add edx , 4
    Loop XORinputs
 
 ret
 inputs ENDP
 
-;procedure to substitute the resulted matrix from s-Box
-Esubstitute PROC
-  ;mov sbox , ASMDLL.sBox
+
+KeysGeneration PROC
 
 ret
-Esubstitute ENDP
+KeysGeneration PROC
 
-;procedure to shiftrows left of the resulted substituted matrix
-Eshiftrows PROC
 
-ret
-Eshiftrows ENDP
-
-;XORing the resulted shiftedrows matrix with the constant Encr matrix
-Eaddmatrix PROC
+Encrypt PROC
 
 ret
-Eaddmatrix ENDP
+Encrypt ENDP
 
-;procedure to loop 10 rounds and will call all the above function in it
-Lop PROC
-
-ret
-Lop ENDP
-
-;procedures for decryption
-
-;procedure to XOR the resulted encrypted text with the constant Decr matrix
-Daddmatrix PROC
+Decrypt PROC
 
 ret
-Daddmatrix ENDP
-
-;procedure to take the resulted XORing matrix and shift them right
-Dshiftrows PROC
-
-ret
-Dshiftrows ENDP
-
-;procedure to substitute the resulted shifted matrix with the Decrypted s-Box
-Dsubstitute PROC
-  ;mov sbox , ASMDLL.sBox
-
-ret
-Dsubstitute ENDP
-
-;procedure to loop 10 rounds of decryption and calling all of the above procedures in it
-Lope PROC
-
-Lope ENDP
-
-
+Decrypt PROC
 
 ; DllMain is required for any DLL
 DllMain PROC hInstance:DWORD, fdwReason:DWORD, lpReserved:DWORD
