@@ -34,6 +34,14 @@ namespace ClientSide
             clientSocket.Send(encryptedMessage);
         }
 
+        public static byte[] StringToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
+        }
+
         /// <summary>
         /// Encrypt the string using Assembly DLL
         /// </summary>
@@ -41,7 +49,10 @@ namespace ClientSide
         /// <returns></returns>
         public byte[] EncryptMessage(string message, string key)
         {
-            throw new NotImplementedException();
+            byte[] m = StringToByteArray(message);
+            byte[] k = StringToByteArray(key);
+            ASMDLL.Encrypt(m, k, 16);
+            return m;
         }
         private void SendBtn_Click(object sender, EventArgs e)
         {
@@ -56,6 +67,11 @@ namespace ClientSide
         public void CloseClientSocket()
         {
             this.clientSocket.Close();
+        }
+
+        private void clientSideForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

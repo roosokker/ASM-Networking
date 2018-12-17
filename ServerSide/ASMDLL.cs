@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace ClientSide
+namespace ServerSide
 {
     class ASMDLL
     {
@@ -27,7 +27,7 @@ namespace ClientSide
     { "a0", "e0", "3b", "4d", "ae", "2a", "f5", "b0", "c8", "eb", "bb", "3c", "83", "53", "99", "61"},
     { "17", "2b", "04", "7e", "ba", "77", "d6", "26", "e1", "69", "14", "63", "55", "21", "0c", "7d"}};
         [DllImport("Project.dll")]
-        private static extern void Decrypt([In, Out] byte[] text, [In, Out] byte[] key, [In, Out] int length);
+        public static extern void Decrypt([In, Out] byte[] text, [In, Out] byte[] key, [In, Out] int length);
 
     }
 }

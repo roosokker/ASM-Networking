@@ -42,7 +42,7 @@ namespace ServerSide
             int count = this.receiverSocket.Receive(temp);
             return temp;
         }
-      
+
         public void UpdateMessage(byte[] decryptedMessage)
         {
             messageTextBox.Text = Encoding.ASCII.GetString(decryptedMessage, 0, decryptedMessage.Length);
@@ -52,9 +52,10 @@ namespace ServerSide
         /// </summary>
         /// <param name="cipherText"></param>
         /// <returns></returns>
-        public byte[] DecryptMessage(byte[] cipherText, byte [] key) 
+        public byte[] DecryptMessage(byte[] cipherText, byte[] key)
         {
-            throw new NotImplementedException();
+            ASMDLL.Decrypt(cipherText, key, 16);
+            return cipherText; //plainText.
         }
 
         private void btnStartServer_Click(object sender, EventArgs e)
@@ -66,7 +67,7 @@ namespace ServerSide
             byte[] key = new byte[16];
             Array.Copy(allData, 0, cipherText, 0, 16);
             Array.Copy(allData, 16, key, 0, 16);
-            byte[] plainText = DecryptMessage(cipherText,key);
+            byte[] plainText = DecryptMessage(cipherText, key);
             this.UpdateMessage(plainText);
             this.CloseServerSocket();
         }
@@ -76,5 +77,9 @@ namespace ServerSide
             this.serverSocket.Close();
         }
 
+        private void ServerSideForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

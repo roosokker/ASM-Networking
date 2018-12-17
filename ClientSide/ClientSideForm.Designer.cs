@@ -37,9 +37,10 @@
             // 
             // SendBtn
             // 
-            this.SendBtn.Location = new System.Drawing.Point(565, 356);
+            this.SendBtn.Location = new System.Drawing.Point(424, 289);
+            this.SendBtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.SendBtn.Name = "SendBtn";
-            this.SendBtn.Size = new System.Drawing.Size(86, 36);
+            this.SendBtn.Size = new System.Drawing.Size(64, 29);
             this.SendBtn.TabIndex = 0;
             this.SendBtn.Text = "Send";
             this.SendBtn.UseVisualStyleBackColor = true;
@@ -47,20 +48,22 @@
             // 
             // messageTxtBox
             // 
-            this.messageTxtBox.Location = new System.Drawing.Point(133, 35);
+            this.messageTxtBox.Location = new System.Drawing.Point(100, 28);
+            this.messageTxtBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.messageTxtBox.Multiline = true;
             this.messageTxtBox.Name = "messageTxtBox";
             this.messageTxtBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.messageTxtBox.Size = new System.Drawing.Size(530, 150);
+            this.messageTxtBox.Size = new System.Drawing.Size(398, 123);
             this.messageTxtBox.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(25, 104);
+            this.label1.Location = new System.Drawing.Point(19, 84);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(90, 20);
+            this.label1.Size = new System.Drawing.Size(77, 17);
             this.label1.TabIndex = 2;
             this.label1.Text = "Message:";
             // 
@@ -68,33 +71,37 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(25, 269);
+            this.label2.Location = new System.Drawing.Point(19, 219);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(46, 20);
+            this.label2.Size = new System.Drawing.Size(40, 17);
             this.label2.TabIndex = 4;
             this.label2.Text = "Key:";
             // 
             // keyTextBox
             // 
-            this.keyTextBox.Location = new System.Drawing.Point(133, 200);
+            this.keyTextBox.Location = new System.Drawing.Point(100, 162);
+            this.keyTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.keyTextBox.Multiline = true;
             this.keyTextBox.Name = "keyTextBox";
             this.keyTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.keyTextBox.Size = new System.Drawing.Size(530, 150);
+            this.keyTextBox.Size = new System.Drawing.Size(398, 123);
             this.keyTextBox.TabIndex = 3;
             // 
             // clientSideForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(675, 404);
+            this.ClientSize = new System.Drawing.Size(506, 328);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.keyTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.messageTxtBox);
             this.Controls.Add(this.SendBtn);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "clientSideForm";
             this.Text = "Client Side ";
+            this.Load += new System.EventHandler(this.clientSideForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

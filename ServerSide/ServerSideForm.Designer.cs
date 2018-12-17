@@ -37,17 +37,19 @@
             // 
             this.msgLBL.AutoSize = true;
             this.msgLBL.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.msgLBL.Location = new System.Drawing.Point(12, 92);
+            this.msgLBL.Location = new System.Drawing.Point(9, 75);
+            this.msgLBL.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.msgLBL.Name = "msgLBL";
-            this.msgLBL.Size = new System.Drawing.Size(179, 20);
+            this.msgLBL.Size = new System.Drawing.Size(154, 17);
             this.msgLBL.TabIndex = 0;
             this.msgLBL.Text = "Received Message: ";
             // 
             // btnStartServer
             // 
-            this.btnStartServer.Location = new System.Drawing.Point(487, 210);
+            this.btnStartServer.Location = new System.Drawing.Point(365, 171);
+            this.btnStartServer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnStartServer.Name = "btnStartServer";
-            this.btnStartServer.Size = new System.Drawing.Size(75, 28);
+            this.btnStartServer.Size = new System.Drawing.Size(56, 23);
             this.btnStartServer.TabIndex = 1;
             this.btnStartServer.Text = "Start Server";
             this.btnStartServer.UseVisualStyleBackColor = true;
@@ -56,24 +58,27 @@
             // messageTextBox
             // 
             this.messageTextBox.Enabled = false;
-            this.messageTextBox.Location = new System.Drawing.Point(197, 12);
+            this.messageTextBox.Location = new System.Drawing.Point(148, 10);
+            this.messageTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.messageTextBox.Multiline = true;
             this.messageTextBox.Name = "messageTextBox";
             this.messageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.messageTextBox.Size = new System.Drawing.Size(365, 169);
+            this.messageTextBox.Size = new System.Drawing.Size(275, 138);
             this.messageTextBox.TabIndex = 2;
             // 
             // ServerSideForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(590, 250);
+            this.ClientSize = new System.Drawing.Size(442, 203);
             this.Controls.Add(this.messageTextBox);
             this.Controls.Add(this.btnStartServer);
             this.Controls.Add(this.msgLBL);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "ServerSideForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Server Side Form";
+            this.Load += new System.EventHandler(this.ServerSideForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
