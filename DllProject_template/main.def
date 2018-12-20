@@ -1,1 +1,13 @@
 EXPORTS
+Encrypt @1
+Decrypt @2
+copyKeytoAllKeys @3
+substituteBytesEncrypt @4
+shiftRowsEncrypt @5
+mixColumnsEncrypt @6
+addRoundKey @7
+keyGeneration @8
+mixColumnsDecrypt2 @9
+mixColumnsDecrypt1 @10
+subsituteBytesDecrypt @11
+shiftRowsDecrypt @12

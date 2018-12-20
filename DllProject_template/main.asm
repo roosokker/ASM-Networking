@@ -1,41 +1,5 @@
 include irvine32.inc
 .data
-
-;DATA FOR ENCRYPTION
-;--------------- input DATA --------------- 
-       ;write your data here
-;--------------- End of input DATA --------------- 
-
-;--------------- Esubstitute DATA --------------- 
-       ;write your data here
-;--------------- End of Esubstitute DATA ---------------
-
-;--------------- Eshiftrows DATA ---------------
-       ;write your data here
-;--------------- End of Eshiftrows DATA ---------------
-
-;--------------- Eaddmatrix DATA ---------------
-       ;write your data here
-;--------------- End of Eaddmatrix DATA ---------------
-
-
-;DATA FOR DECRYPTION
-
-;--------------- Daddmatrix DATA --------------- 
-       ;write your data here
-;--------------- End of Daddmatrix DATA ---------------
-
-;--------------- Dshiftrows DATA --------------- 
-       ;write your data here
-;--------------- End of Dshiftrows DATA ---------------
-
-;--------------- Dsubstitute DATA --------------- 
-       ;write your data here
-;--------------- End of Dsubstitute DATA --------------- 
-
-
-;DATA FOR ENCRYPTED S-BOX
-
  SBOX_R0 Byte 63h,7Ch,77h,7Bh,0F2h,6Bh,6Fh,0C5h,30h,01h,67h,2Bh,0FEh,0D7h,0ABh,76h
  SBOX_R1 Byte 0CAh,82h,0C9h,7Dh,0FAh,59h,47h,0F0h,0ADh,0D4h,0A2h,0AFh,9Ch,0A4h,72h,0C0h
  SBOX_R2 Byte 0B7h,0FDh,93h,26h,36h,3Fh,0F7h,0CCh,34h,0A5h,0E5h,0F1h,71h,0D8h,31h,15h
@@ -52,10 +16,7 @@ include irvine32.inc
  SBOX_R13  Byte 70h,3Eh,0B5h,66h,48h,03h,0F6h,0Eh,61h,35h,57h,0B9h,86h,0C1h,1Dh,9Eh
  SBOX_R14  Byte 0E1h,0F8h,98h,11h,69h,0D9h,8Eh,94h,9Bh,1Eh,87h,0E9h,0CEh,55h,28h,0DFh
  SBOX_R15  Byte  8Ch,0A1h,89h,0Dh,0BFh,0E6h,42h,68h,41h,99h,2Dh,0Fh,0B0h,54h,0BBh,16
-
-
- ;DATA FOR DECRYPTED S-BOX
-
+ ;--------------------------------------------------------------------------------------------------------------
  Inv_SBOX_R0 Byte 52h, 09h, 6ah, 0d5h, 30h, 36h, 0a5h, 38h, 0bfh, 40h, 0a3h, 9eh, 81h, 0f3h, 0d7h, 0fbh
  Inv_SBOX_R1 Byte      7ch, 0e3h, 39h, 82h, 9bh, 2fh, 0ffh, 87h, 34h, 8eh, 43h, 44h, 0c4h, 0deh, 0e9h, 0cbh
  Inv_SBOX_R2 Byte      54h, 7bh, 94h, 32h, 0a6h, 0c2h, 23h, 3dh, 0eeh, 4ch, 95h, 0bh, 42h, 0fah, 0c3h, 4eh
@@ -72,78 +33,589 @@ include irvine32.inc
  Inv_SBOX_R13  Byte 60h, 51h, 7fh, 0a9h, 19h, 0b5h, 4ah, 0dh, 2dh, 0e5h, 7ah, 9fh, 93h, 0c9h, 9ch, 0efh
  Inv_SBOX_R14  Byte 0a0h, 0e0h, 3bh, 4dh, 0aeh, 2ah, 0f5h, 0b0h, 0c8h, 0ebh, 0bbh, 3ch, 83h, 53h, 99h, 61h
  Inv_SBOX_R15  Byte  17h, 2bh, 04h, 7eh, 0bah, 77h, 0d6h, 26h, 0e1h, 69h, 14h, 63h, 55h, 21h, 0ch, 7dh
-
+;--------------------------------------------------------------------------------------------------------------
+ em byte 2h,1h,1h,3h,3h,2h,1h,1h,1h,3h,2h,1h,1h,1h,3h,2h
+;--------------------------------------------------------------------------------------------------------------
+ eme byte 0eh,09h,0dh,0bh,0bh,0eh,09h,0dh,0dh,0bh,0eh,09h,09h,0dh,0bh,0eh
+;--------------------------------------------------------------------------------------------------------------
+ rCon byte 01h,00h, 00h, 00h, 02h,00h, 00h, 00h,04h,00h, 00h, 00h,08,00h, 00h, 00h,10h, 00h, 00h,00h, 20h, 00h, 00h, 00h, 40h, 00h, 00h, 00h, 80h,00h, 00h, 00h, 01bh,00h, 00h, 00h,36h,00h, 00h, 00h
+;--------------------------------------------------------------------------------------------------------------
+AllKeys byte 176 dup(0)
+holdKeyIndex dword ?
+result byte 16 dup(0),0
+resulte byte 16 dup(0),0
+roundNumber byte 0
+temp byte 4 dup(?)
+;--------------------------------------------------------------------------------------------------------------
 
 .code
+;----------------------------------------------------------
+;Calculates: message XOR key
+;Recieves: ESI (offset of text array), EDI (offset of key array)
+;Returns: ESI on 'text XOR key' array
+;----------------------------------------------------------
+addRoundKey proc
+   mov ecx , lengthof text
+   XORinputs:
+               mov bl ,[ESI]
+			   xor bl , [EDI]
+			   mov [ESI] , bl
+			   inc ESI
+			   inc EDI
+   Loop XORinputs
+   mov ESI, offset text 
+	RET
+addRoundKey ENDP
 
-;PROCEDURES FOR ENCRYPION
 
-;procedure to input the text and the key then XORing them together and the result is in another matrix
-input PRC
+;----------------------------------------------------------
+;Calculates: Substitues from "Sbox" to text array
+;Recieves: esi (offset on text array), edi offset SBOX_R0
+;Returns: text array after substitution.
+;----------------------------------------------------------
+substituteBytesEncrypt proc
+	mov ecx ,16
+	subtitutingFromSbox:
+		movzx eax,byte ptr [esi]
+		mov bl,[edi+eax]
+		mov byte ptr[esi],  bl
+		inc esi
+	loop subtitutingFromSbox
+	RET
+substituteBytesEncrypt ENDP
+;----------------------------------------------------------
+;Calculates: Shifting rows "left" according to row number.
+;Recieves: ESI (offset of text array). on first elment in second row.
+;Returns:Text array after shifting.
+;----------------------------------------------------------
+shiftRowsEncrypt PROC
+	mov ecx,3
+	mov edi ,1
+	L4:
+		push ecx
+		push esi
+		mov ecx,edi
+		L5:
+			push ecx
+			push esi
+			mov ecx ,3
+			mov al,[esi]
+			L6:
+				mov bl ,[esi+4]
+				mov [esi],bl
+				add esi,4
+			loop L6
+			mov [esi],al
+			pop esi
+			pop ecx
+		loop L5
+		pop esi 
+		add esi,1
+		inc edi
+		pop ecx
+	loop L4
+	RET
+shiftRowsEncrypt ENDP
+;----------------------------------------------------------
+;Calculates: Shifting rows "right" according to row number.
+;Recieves: ESI (offset of text array). on first elment in second row.
+;Returns:Text array after shifting.
+;----------------------------------------------------------
+shiftRowsDecrypt PROC
+	mov esi, offset text +1
+	mov ecx,3
+	mov edi ,1
+	L5:
+		push ecx
+		push esi
+		mov ecx,edi
+		L6:
+			push ecx
+			push esi
+			mov ecx ,3
+			mov al,[esi+12]
+			L7:
+				mov ebx ,ecx
+				shl ebx,2
+				mov ah ,[esi+ebx-4]
+				mov [esi+ebx],ah
+			loop L7
+			pop esi
+			mov [esi],al
+			pop ecx
+		loop L6
+		pop esi 
+		add esi,1
+		inc edi
+		pop ecx
+	loop L5
 
-ret
-input ENDP
+
+	RET
+shiftRowsDecrypt ENDP
+;----------------------------------------------------------
+;Calculates: Multiplying the output matrix from shift rows by a fixed matrix using advanced method for multiplication.
+;Recieves: EDI (offset of Encryption Matrix), ESI (offset of text).
+;Returns: Text after mixing columns.
+;----------------------------------------------------------
+mixColumnsEncrypt PROC
+	mov edx, offset result
+	mov ecx, 4
+	l1:
+		push ecx
+		push edi
+		push esi
+			mov ecx, 4
+			l3:
+			push ecx
+			push edi
+			push esi
+				mov ecx, 4
+				l2:
+				mov al, [esi]
+				mov bl, [edi]
+				cmp bl, 2
+				je two
+				ja three
+				jmp next
+		
+				two:
+				shl al, 1
+				jnc next
+				xor al, 1bh
+				jmp next
+		
+				three:
+				mov bl, al
+				shl bl, 1
+				jnc threecarry
+				xor bl, 1bh
+				threecarry:		
+				xor al, bl
+				
+				next:
+				xor [edx], al
+				mov al, [edx]
+				inc esi
+				add edi, 4
+				loop l2
+			pop esi
+			pop edi
+			pop ecx
+			inc edi
+			inc edx
+			loop l3
+		pop esi
+		pop edi
+		pop ecx
+		add esi,4
+	loop l1
+	
+	mov edx, offset result
+	mov esi, offset text
+	mov ecx, 16
+	copyValuesToTextArray:
+		push ecx
+			mov cl, [edx]
+			mov [esi], cl
+			inc edx
+			inc esi
+		pop ecx
+	loop copyValuesToTextArray
+
+		mov edx, offset result
+    mov ecx, lengthof result
+    mov eax, 0
+    ZeroingRes:
+        and [edx], eax
+        inc edx
+    loop ZeroingRes
+	RET
+mixColumnsEncrypt ENDP
 
 
-;procedure to substitute the resulted matrix from s-Box
-Esubstitute PROC
-  ;mov sbox , ASMDLL.sBox
+;----------------------------------------------------------
+;Calculates: Substitues from "InvSbox" to text array
+;Recieves: esi (offset on text array), edi offset Inv_SBOX_R0
+;Returns: Text after substitution.
+;----------------------------------------------------------
+subsituteBytesDecrypt proc
+	mov ecx ,16
+	subtitutingFromInvSbox:
+		movzx eax,byte ptr [esi]
+		mov bl,[edi+eax]
+		mov byte ptr[esi],  bl
+		inc esi
+	loop subtitutingFromInvSbox
+	mov esi, offset text
+	RET
+subsituteBytesDecrypt ENDP
+;----------------------------------------------------------
+;Calculates:  Multiplying the output matrix from shift rows by a fixed matrix using advanced method for multiplication.
+;Recieves: EDI (offset of fixed mtrix for decryption "eme"), ESI (offset of Encrypted Text), EDX (offset or temporary array "texte")
+;Returns: Text array after mixing columns
+;----------------------------------------------------------
+mixColumnsDecrypt1 PROC
+	mov ecx, 4
+	l7:
+		push ecx
+		push edi
+		push esi
+			mov ecx, 4
+			l8:
+			push ecx
+			push edi
+			push esi
+				mov ecx, 4
+				l9:
+					call mixColumnsDecrypt2				
+				loop l9
+			pop esi
+			pop edi
+			pop ecx
+			inc edi
+			inc edx
+			loop l8
+		pop esi
+		pop edi
+		pop ecx
+		add esi,4
+	loop l7
 
-ret
-Esubstitute ENDP
+	mov edx, offset resulte
+	mov esi, offset text
+	mov ecx, 16
+	copyValuesToTexteArray:
+		push ecx
+			mov cl, [edx]
+			mov [esi], cl
+			inc edx
+			inc esi
+		pop ecx
+	loop copyValuesToTexteArray
 
-;procedure to rotaterows left of the resulted substituted matrix
-Eshiftrows PROC
+	mov edx, offset resulte
+    mov ecx, lengthof resulte
+    mov eax, 0
+    ZeroingRese:
+        and [edx], eax
+        inc edx
+    loop ZeroingRese
+	RET
+mixColumnsDecrypt1 ENDP
 
-ret
-Eshiftrows ENDP
+;----------------------------------------------------------
+;Calculates: mixColumnsDecrypt1 Continue.
+;Recieves:
+;Returns:
+;----------------------------------------------------------
+mixColumnsDecrypt2 PROC
+				mov al, [esi]
+				mov bl, [edi]
+				cmp bl, 9h
+				je nine
+				cmp bl, 0bh
+				je beeh
+				cmp bl, 0dh
+				je deeh
+				cmp bl, 0eh
+				je eeeh
+				
+				nine:
+				mov bl, al
+				push ecx
+				mov ecx, 3
+				l11:
+					shl bl, 1
+					jnc lastt
+					xor bl, 1bh
+					lastt:
+				loop l11
+				xor al, bl
+				pop ecx
+				jmp next
+		
+				beeh:
+				mov bl, al
+				push ecx
+				mov ecx, 3
+				l12:
+					shl bl, 1
+					jnc lasta
+					xor bl, 1bh
+					lasta:
+					cmp ecx,3
+					jne beeho
+					xor al, bl
+					beeho:
+				loop l12
+				xor al, bl
+				pop ecx
+				jmp next
 
-;XORing the resulted shiftedrows matrix with the constant Encrypted matrix
-Eaddmatrix PROC
+				deeh:
+				mov bl, al
+				push ecx
+				mov ecx, 3
+				l13:
+					shl bl, 1
+					jnc lastb
+					xor bl, 1bh
+					lastb:
+					cmp ecx,2
+					jne deeho
+					xor al, bl
+					deeho:
+				loop l13
+				xor al, bl
+				pop ecx
+				jmp next
 
-ret
-Eaddmatrix ENDP
+				eeeh:
+				mov bl, al
+				push ecx
+				mov ecx, 3
+				l14:
+					shl bl, 1
+					jnc lastc
+					xor bl, 1bh
+					lastc:
 
-;procedure to loop 10 rounds and will call all of the above functions in it
-Lop PROC
+					cmp ecx,3
+					jne eeeho
+					mov al, bl
+					eeeho:
 
-ret
-Lop ENDP
+					cmp ecx,2
+					jne eeeha
+					xor al, bl
+					eeeha:
+				loop l14
+				xor al, bl
+				pop ecx
+				jmp next
+				
+				next:
+				xor [edx], al
+				mov al, [edx]
+				inc esi
+				add edi, 4
+	RET
+mixColumnsDecrypt2 ENDP
+;----------------------------------------------------------
+;Calculates: Generate Key according to round number.
+;Recieves: EDI (Offset on key array), roundNumber variable (Zero based).
+;Returns: Newly generated key array.
+;----------------------------------------------------------
+keyGeneration PROC
+		add edi,12
+		mov ebx, offset temp
+			;(0) Copying to a temp array
+			mov ecx, 4
+			copyingToTemp:
+				mov al, [edi]
+				mov [ebx], al
+				inc edi
+				inc ebx
+			loop copyingToTemp
 
-;PROCEDURES FOR DECRYPTION
+			;(1) Virtual Rotation
+			movzx ecx, byte ptr [temp]
+			push ecx
+				mov ecx, 8
+				rotating:
+					shl temp+3,1
+					rcl temp+2,1
+					rcl temp+1,1
+					rcl temp,1
+				loop rotating
+			pop ecx
+		mov [temp+3], cl
 
-;procedure to XOR the resulted encrypted text with the constant Decrypted matrix
-Daddmatrix PROC
+		;(2) Virtual Subsitution
+		;
+		mov ecx, 4
+		mov ebx, offset temp
+			subTemp:
+				push ecx
+					mov ecx, offset SBOX_R0
+					movzx eax, byte ptr [ebx]
+					add ecx, eax
+					movzx eax, byte ptr [ecx]
+					mov [ebx], al
+					inc ebx
+				pop ecx
+			loop subTemp
 
-ret
-Daddmatrix ENDP
+		;(3) XOR
+		mov ebx, offset temp
+		mov edi, offset key
+		mov eax,4
+		movzx ecx, roundNumber
+		mul ecx
+		mov ecx, eax
+		mov eax, offset rcon
+		add eax, ecx
+		
+		mov ecx,16
+		XORing:
+			push ecx
+				push eax
+				mov eax, ecx
+				mov ecx, 4
+				div ecx
+				cmp edx,0
+				jne NotEndOfColumn
+					mov ebx, offset temp
+				NotEndOfColumn:
+				pop eax
+				movzx ecx, byte ptr[ebx]
+				xor cl, [edi]
+				pop esi
+				cmp esi,12
+				push esi
+				jle noRCON
+					xor cl, [eax]
+				noRcon:
+					mov [ebx], cl
+					mov [edi], cl
+					inc ebx		;Offset of temp array
+					inc edi		;Offset of key array
+					inc eax		;Offset of RCON array
+			pop ecx
+		loop XORing
 
-;procedure to take the resulted XOR-ed matrix and rotate them right
-Dshiftrows PROC
-
-ret
-Dshiftrows ENDP
-
-;procedure to substitute the resulted rotated matrix with the Decrypted S-Box
-Dsubstitute PROC
-  ;mov sbox , ASMDLL.sBox
-
-ret
-Dsubstitute ENDP
-
-;procedure to loop 10 rounds of decryption and calling all of the above procedures in it
-Lope PROC
-
-Lope ENDP
-
+	RET
+keyGeneration ENDP
+;----------------------------------------------------------
+;Calculates: Copy first key + newly generated key to a memory array.
+;Recieves: EBX (Offset of AllKeys array), EDI (offset on key).
+;Returns: A new key is add to AllKeys array.
+;----------------------------------------------------------
+copyKeyToAllKeys PROC
+		mov ecx, 16
+		copying:
+			mov eax, [edi]
+			mov [ebx], eax
+			inc edi
+			inc ebx
+		loop copying
+	RET
+copyKeyToAllKeys ENDP
 
 Encrypt proc text:PTR byte, key: PTR byte, len:Dword
+		mov esi, offset text
+		mov edi, offset key
+		call addRoundKey									;(0)
 
+		mov ebx, offset allKeys
+		mov holdKeyIndex, ebx
+		mov ecx, 9
+		DoNineRounds:
+			push ecx
+				mov ebx, holdKeyIndex
+				mov edi, offset key
+				call copyKeytoAllKeys
+				mov holdKeyIndex, ebx
+
+				mov edi, offset SBOX_R0
+				mov esi, offset text
+				call substituteBytesEncrypt					;(1)
+
+				mov esi, offset text +1
+				call shiftRowsEncrypt						;(2)
+
+				mov edi, offset em
+				mov esi, offset text
+				call mixColumnsEncrypt						;(3)
+
+				pop ecx										;
+				mov eax, 9									; 
+				sub eax, ecx								;	
+				push ecx									;
+				mov roundNumber, al							;roundNumber is zero based
+				mov edi, offset key							;
+				call keyGeneration							;<====Generation for key
+				
+				mov esi, offset text
+				mov edi, offset key
+				call addRoundKey							;(4)
+
+			pop ecx
+		loop DoNineRounds
+		mov ebx, holdKeyIndex
+		mov edi, offset key
+		call copyKeytoAllKeys
+		mov holdKeyIndex, ebx
+
+		mov edi, offset SBOX_R0
+		mov esi, offset text
+		call substituteBytesEncrypt							;(1)
+
+		mov esi, offset text +1
+		call shiftRowsEncrypt								;(2)
+
+		mov roundNumber, 9									; Zero bazed
+		mov edi, offset key
+		call keyGeneration									;<====Generation for key
+
+		mov edi, offset key
+		mov ebx, holdKeyIndex
+		call copyKeytoAllKeys
+		mov holdKeyIndex, ebx
+
+		mov esi, offset text
+		mov edi, offset key
+		call addRoundKey									;(3)
+
+		mov ebx, offset text								;Output
+		call writeMatrixColumn
 ret
 Encrypt Endp
 
 Decrypt proc text:PTR byte, key: PTR byte, len:Dword
+		sub holdKeyIndex, 10h
+		mov edi, holdKeyIndex				;Previously saved key.
+		mov esi, offset text
+		call addRoundKey
 
+		mov ecx, 9
+		DoNineRoundsOfDecryption:
+			push ecx
+				mov esi, offset text
+				call shiftRowsDecrypt
+
+				mov esi, offset text
+				mov edi, offset Inv_SBOX_R0
+				call subsituteBytesDecrypt
+
+				sub holdKeyIndex, 10h
+				mov edi, holdkeyIndex
+				mov esi, offset text
+				call addRoundKey
+
+				mov edi, offset eme
+				mov esi, offset text
+				mov edx, offset resulte
+				call mixColumnsDecrypt1
+			pop ecx
+		loop DoNineRoundsOfDecryption
+
+				sub holdKeyIndex, 10h		;Previous saved key.
+				mov edi, holdKeyIndex
+
+				mov esi, offset text
+				call shiftRowsDecrypt
+
+				mov esi, offset text
+				mov edi, offset Inv_SBOX_R0
+				call subsituteBytesDecrypt
+
+				mov esi, offset text
+				mov edi, holdkeyIndex
+				call addRoundKey
+	mov ebx, offset text
+	call writeMatrixColumn
 ret
 Decrypt Endp
 

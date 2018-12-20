@@ -68,10 +68,5 @@ namespace ClientSide
         {
             this.clientSocket.Close();
         }
-
-        private void clientSideForm_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

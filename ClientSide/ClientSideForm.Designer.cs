@@ -100,8 +100,7 @@
             this.Controls.Add(this.SendBtn);
             this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "clientSideForm";
-            this.Text = "Client Side ";
-            this.Load += new System.EventHandler(this.clientSideForm_Load);
+            this.Text = "\\";
             this.ResumeLayout(false);
             this.PerformLayout();
 
