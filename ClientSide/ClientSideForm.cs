@@ -60,7 +60,7 @@ namespace ClientSide
             this.IntializeClientSocket();
             string key = keyTextBox.Text;
             byte[] encryptedMessage = this.EncryptMessage(messageTxtBox.Text, key);
-            this.clientSocket.Send(encryptedMessage.Concat(ASCIIEncoding.ASCII.GetBytes(key)).ToArray());
+            this.clientSocket.Send(encryptedMessage.Concat(StringToByteArray(key)).ToArray());
             this.CloseClientSocket();
         }
 

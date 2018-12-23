@@ -1,6 +1,35 @@
 include irvine32.inc
 .data
- SBOX_R0 Byte 63h,7Ch,77h,7Bh,0F2h,6Bh,6Fh,0C5h,30h,01h,67h,2Bh,0FEh,0D7h,0ABh,76h
+	;------------------------------------------------------------------------------------
+	AllKeys byte 176 dup(0)
+	holdKeyIndex dword ?
+
+	em byte 2h,1h,1h,3h,3h,2h,1h,1h,1h,3h,2h,1h,1h,1h,3h,2h
+	result byte 16 dup(0),0
+
+	;62,cf,0c,99,02,92,0c,18,27,91,f4,30,26,0d,d6,74
+	   
+	
+	keye byte 0d0h, 14h, 0f9h, 0a8h, 0c9h, 0eeh, 25h, 89h, 0e1h, 3fh, 0ch, 0c8h, 0b6h, 63h, 0ch, 0a6h
+	;39h, 25h, 84h, 1dh, 02h, 0dch, 09h, 0fbh, 0dch, 11h, 85h, 97h, 19h, 6ah, 0bh, 32h
+	texte byte 4bh, 86h, 8dh, 6dh, 2ch, 4ah, 89h, 80h, 33h, 9dh, 0f4h, 0e8h, 37h, 0d2h, 18h, 0d8h
+	eme byte 0eh,09h,0dh,0bh,0bh,0eh,09h,0dh,0dh,0bh,0eh,09h,09h,0dh,0bh,0eh
+	resulte byte 16 dup(0),0
+
+	;63,f2,7d,d4,c9,63,d4,fa,fe,26,c9,63,30,f2,c9,82
+
+	i dword 0
+	j dword 0
+
+	offsetKey dword ?
+	offsetText dword ?
+
+
+	rCon byte 01h,00h, 00h, 00h, 02h,00h, 00h, 00h,04h,00h, 00h, 00h,08,00h, 00h, 00h,10h, 00h, 00h,00h, 20h, 00h, 00h, 00h, 40h, 00h, 00h, 00h, 80h,00h, 00h, 00h, 01bh,00h, 00h, 00h,36h,00h, 00h, 00h
+	roundNumber byte 0
+	temp byte 4 dup(?)
+
+SBOX_R0 Byte 63h,7Ch,77h,7Bh,0F2h,6Bh,6Fh,0C5h,30h,01h,67h,2Bh,0FEh,0D7h,0ABh,76h
  SBOX_R1 Byte 0CAh,82h,0C9h,7Dh,0FAh,59h,47h,0F0h,0ADh,0D4h,0A2h,0AFh,9Ch,0A4h,72h,0C0h
  SBOX_R2 Byte 0B7h,0FDh,93h,26h,36h,3Fh,0F7h,0CCh,34h,0A5h,0E5h,0F1h,71h,0D8h,31h,15h
  SBOX_R3 Byte     04h,0C7h,23h,0C3h,18h,96h,05h,9Ah,07h,12h,80h,0E2h,0EBh,27h,0B2h,75h
@@ -16,7 +45,9 @@ include irvine32.inc
  SBOX_R13  Byte 70h,3Eh,0B5h,66h,48h,03h,0F6h,0Eh,61h,35h,57h,0B9h,86h,0C1h,1Dh,9Eh
  SBOX_R14  Byte 0E1h,0F8h,98h,11h,69h,0D9h,8Eh,94h,9Bh,1Eh,87h,0E9h,0CEh,55h,28h,0DFh
  SBOX_R15  Byte  8Ch,0A1h,89h,0Dh,0BFh,0E6h,42h,68h,41h,99h,2Dh,0Fh,0B0h,54h,0BBh,16
- ;--------------------------------------------------------------------------------------------------------------
+
+
+
  Inv_SBOX_R0 Byte 52h, 09h, 6ah, 0d5h, 30h, 36h, 0a5h, 38h, 0bfh, 40h, 0a3h, 9eh, 81h, 0f3h, 0d7h, 0fbh
  Inv_SBOX_R1 Byte      7ch, 0e3h, 39h, 82h, 9bh, 2fh, 0ffh, 87h, 34h, 8eh, 43h, 44h, 0c4h, 0deh, 0e9h, 0cbh
  Inv_SBOX_R2 Byte      54h, 7bh, 94h, 32h, 0a6h, 0c2h, 23h, 3dh, 0eeh, 4ch, 95h, 0bh, 42h, 0fah, 0c3h, 4eh
@@ -33,29 +64,16 @@ include irvine32.inc
  Inv_SBOX_R13  Byte 60h, 51h, 7fh, 0a9h, 19h, 0b5h, 4ah, 0dh, 2dh, 0e5h, 7ah, 9fh, 93h, 0c9h, 9ch, 0efh
  Inv_SBOX_R14  Byte 0a0h, 0e0h, 3bh, 4dh, 0aeh, 2ah, 0f5h, 0b0h, 0c8h, 0ebh, 0bbh, 3ch, 83h, 53h, 99h, 61h
  Inv_SBOX_R15  Byte  17h, 2bh, 04h, 7eh, 0bah, 77h, 0d6h, 26h, 0e1h, 69h, 14h, 63h, 55h, 21h, 0ch, 7dh
-;--------------------------------------------------------------------------------------------------------------
- em byte 2h,1h,1h,3h,3h,2h,1h,1h,1h,3h,2h,1h,1h,1h,3h,2h
-;--------------------------------------------------------------------------------------------------------------
- eme byte 0eh,09h,0dh,0bh,0bh,0eh,09h,0dh,0dh,0bh,0eh,09h,09h,0dh,0bh,0eh
-;--------------------------------------------------------------------------------------------------------------
- rCon byte 01h,00h, 00h, 00h, 02h,00h, 00h, 00h,04h,00h, 00h, 00h,08,00h, 00h, 00h,10h, 00h, 00h,00h, 20h, 00h, 00h, 00h, 40h, 00h, 00h, 00h, 80h,00h, 00h, 00h, 01bh,00h, 00h, 00h,36h,00h, 00h, 00h
-;--------------------------------------------------------------------------------------------------------------
-AllKeys byte 176 dup(0)
-holdKeyIndex dword ?
-result byte 16 dup(0),0
-resulte byte 16 dup(0),0
-roundNumber byte 0
-temp byte 4 dup(?)
-;--------------------------------------------------------------------------------------------------------------
-
+;#######################################################
 .code
+
 ;----------------------------------------------------------
 ;Calculates: message XOR key
 ;Recieves: ESI (offset of text array), EDI (offset of key array)
 ;Returns: ESI on 'text XOR key' array
 ;----------------------------------------------------------
 addRoundKey proc
-   mov ecx , lengthof text
+   mov ecx , 16
    XORinputs:
                mov bl ,[ESI]
 			   xor bl , [EDI]
@@ -63,7 +81,6 @@ addRoundKey proc
 			   inc ESI
 			   inc EDI
    Loop XORinputs
-   mov ESI, offset text 
 	RET
 addRoundKey ENDP
 
@@ -122,7 +139,8 @@ shiftRowsEncrypt ENDP
 ;Returns:Text array after shifting.
 ;----------------------------------------------------------
 shiftRowsDecrypt PROC
-	mov esi, offset text +1
+	mov esi, offsettext
+	inc esi
 	mov ecx,3
 	mov edi ,1
 	L5:
@@ -149,7 +167,6 @@ shiftRowsDecrypt PROC
 		inc edi
 		pop ecx
 	loop L5
-
 
 	RET
 shiftRowsDecrypt ENDP
@@ -212,7 +229,7 @@ mixColumnsEncrypt PROC
 	loop l1
 	
 	mov edx, offset result
-	mov esi, offset text
+	mov esi, offsettext
 	mov ecx, 16
 	copyValuesToTextArray:
 		push ecx
@@ -223,7 +240,7 @@ mixColumnsEncrypt PROC
 		pop ecx
 	loop copyValuesToTextArray
 
-		mov edx, offset result
+	mov edx, offset result
     mov ecx, lengthof result
     mov eax, 0
     ZeroingRes:
@@ -247,7 +264,6 @@ subsituteBytesDecrypt proc
 		mov byte ptr[esi],  bl
 		inc esi
 	loop subtitutingFromInvSbox
-	mov esi, offset text
 	RET
 subsituteBytesDecrypt ENDP
 ;----------------------------------------------------------
@@ -283,7 +299,7 @@ mixColumnsDecrypt1 PROC
 	loop l7
 
 	mov edx, offset resulte
-	mov esi, offset text
+	mov esi, offsettext
 	mov ecx, 16
 	copyValuesToTexteArray:
 		push ecx
@@ -449,7 +465,7 @@ keyGeneration PROC
 
 		;(3) XOR
 		mov ebx, offset temp
-		mov edi, offset key
+		mov edi, offsetkey
 		mov eax,4
 		movzx ecx, roundNumber
 		mul ecx
@@ -484,7 +500,6 @@ keyGeneration PROC
 					inc eax		;Offset of RCON array
 			pop ecx
 		loop XORing
-
 	RET
 keyGeneration ENDP
 ;----------------------------------------------------------
@@ -502,10 +517,16 @@ copyKeyToAllKeys PROC
 		loop copying
 	RET
 copyKeyToAllKeys ENDP
-
 Encrypt proc text:PTR byte, key: PTR byte, len:Dword
-		mov esi, offset text
-		mov edi, offset key
+pushAD
+		mov eax, text
+		mov offsetText, eax
+
+		mov eax, key
+		mov offsetKey, eax
+
+		mov esi, offsettext
+		mov edi, offsetkey
 		call addRoundKey									;(0)
 
 		mov ebx, offset allKeys
@@ -514,19 +535,21 @@ Encrypt proc text:PTR byte, key: PTR byte, len:Dword
 		DoNineRounds:
 			push ecx
 				mov ebx, holdKeyIndex
-				mov edi, offset key
+				mov edi, offsetkey
 				call copyKeytoAllKeys
 				mov holdKeyIndex, ebx
 
 				mov edi, offset SBOX_R0
-				mov esi, offset text
+				mov esi, offsettext
 				call substituteBytesEncrypt					;(1)
 
-				mov esi, offset text +1
+
+				mov esi, offsettext
+				inc esi
 				call shiftRowsEncrypt						;(2)
 
 				mov edi, offset em
-				mov esi, offset text
+				mov esi, offsettext
 				call mixColumnsEncrypt						;(3)
 
 				pop ecx										;
@@ -534,68 +557,78 @@ Encrypt proc text:PTR byte, key: PTR byte, len:Dword
 				sub eax, ecx								;	
 				push ecx									;
 				mov roundNumber, al							;roundNumber is zero based
-				mov edi, offset key							;
+				mov edi, offsetkey							;
 				call keyGeneration							;<====Generation for key
 				
-				mov esi, offset text
-				mov edi, offset key
+				mov esi, offsettext
+				mov edi, offsetkey
 				call addRoundKey							;(4)
 
 			pop ecx
 		loop DoNineRounds
 		mov ebx, holdKeyIndex
-		mov edi, offset key
+		mov edi, offsetkey
 		call copyKeytoAllKeys
 		mov holdKeyIndex, ebx
 
 		mov edi, offset SBOX_R0
-		mov esi, offset text
+		mov esi, offsettext
 		call substituteBytesEncrypt							;(1)
 
-		mov esi, offset text +1
+		mov esi, offsettext
+		inc esi
 		call shiftRowsEncrypt								;(2)
 
 		mov roundNumber, 9									; Zero bazed
-		mov edi, offset key
+		mov edi, offsetkey
 		call keyGeneration									;<====Generation for key
 
-		mov edi, offset key
+		mov edi, offsetkey
 		mov ebx, holdKeyIndex
 		call copyKeytoAllKeys
 		mov holdKeyIndex, ebx
 
-		mov esi, offset text
-		mov edi, offset key
+		mov esi, offsettext
+		mov edi, offsetkey
 		call addRoundKey									;(3)
 
-		mov ebx, offset text								;Output
-		call writeMatrixColumn
+		mov ebx, text
+		mov ebx, offsettext								;Output
+		mov text, ebx
+popAD
 ret
 Encrypt Endp
 
 Decrypt proc text:PTR byte, key: PTR byte, len:Dword
+pushAD
+		mov eax, text
+		mov offsetText, eax
+
+		mov eax, key
+		mov offsetKey, eax
+
 		sub holdKeyIndex, 10h
 		mov edi, holdKeyIndex				;Previously saved key.
-		mov esi, offset text
+		mov esi, offsettext
 		call addRoundKey
 
 		mov ecx, 9
 		DoNineRoundsOfDecryption:
 			push ecx
-				mov esi, offset text
+				mov esi, offsettext
 				call shiftRowsDecrypt
 
-				mov esi, offset text
+				mov esi, offsettext
 				mov edi, offset Inv_SBOX_R0
 				call subsituteBytesDecrypt
 
 				sub holdKeyIndex, 10h
 				mov edi, holdkeyIndex
-				mov esi, offset text
+				mov esi, offsettext
 				call addRoundKey
 
 				mov edi, offset eme
-				mov esi, offset text
+				mov esi, offsettext
 				mov edx, offset resulte
 				call mixColumnsDecrypt1
 			pop ecx
@@ -604,18 +637,20 @@ Decrypt proc text:PTR byte, key: PTR byte, len:Dword
 				sub holdKeyIndex, 10h		;Previous saved key.
 				mov edi, holdKeyIndex
 
-				mov esi, offset text
+				mov esi, offsettext
 				call shiftRowsDecrypt
 
-				mov esi, offset text
+				mov esi, offsettext
 				mov edi, offset Inv_SBOX_R0
 				call subsituteBytesDecrypt
 
-				mov esi, offset text
+				mov esi, offsettext
 				mov edi, holdkeyIndex
 				call addRoundKey
-	mov ebx, offset text
-	call writeMatrixColumn
+
+				mov ebx, offsetText
+				mov text, ebx
+popAD
 ret
 Decrypt Endp
 
