@@ -419,6 +419,39 @@ mixColumnsDecrypt2 PROC
 	RET
 mixColumnsDecrypt2 ENDP
 ;----------------------------------------------------------
+;Calculates: Generate all keys at once.
+;Recieves: EBX (Offset of AllKeys array), offsetKey memory (offset on key).
+;Returns: AllKeys array full of keys.
+;----------------------------------------------------------
+GenerateAllKeys PROC
+		mov ebx, offset allKeys
+		mov holdKeyIndex, ebx
+		mov ecx, 10
+		generatingAll:
+			push ecx
+				mov ebx, holdKeyIndex
+				mov edi, offsetkey
+				call copyKeytoAllKeys
+				mov holdKeyIndex, ebx
+
+				mov eax, 10
+				pop ecx										;
+				sub eax, ecx								;
+				push ecx
+				mov roundNumber, al							;roundNumber is zero based
+				mov edi, offsetkey							;
+				call keyGeneration							;<====Generation for key
+			pop ecx
+		loop generatingAll
+		mov ebx, holdKeyIndex
+		mov edi, offsetkey
+		call copyKeytoAllKeys
+		mov holdKeyIndex, ebx
+RET
+GenerateAllKeys ENDP
+
+
+;----------------------------------------------------------
 ;Calculates: Generate Key according to round number.
 ;Recieves: EDI (Offset on key array), roundNumber variable (Zero based).
 ;Returns: Newly generated key array.
@@ -502,6 +535,7 @@ keyGeneration PROC
 		loop XORing
 	RET
 keyGeneration ENDP
+
 ;----------------------------------------------------------
 ;Calculates: Copy first key + newly generated key to a memory array.
 ;Recieves: EBX (Offset of AllKeys array), EDI (offset on key).
@@ -517,6 +551,11 @@ copyKeyToAllKeys PROC
 		loop copying
 	RET
 copyKeyToAllKeys ENDP
+;----------------------------------------------------------
+;Calculates: encrypt message.
+;Recieves: text, key and length.
+;Returns: Encrypted message.
+;----------------------------------------------------------
 Encrypt proc text:PTR byte, key: PTR byte, len:Dword
 pushAD
 		mov eax, text
@@ -536,8 +575,8 @@ pushAD
 			push ecx
 				mov ebx, holdKeyIndex
 				mov edi, offsetkey
-				call copyKeytoAllKeys
-				mov holdKeyIndex, ebx
+				call copyKeytoAllKeys					;Saves current key
+				mov holdKeyIndex, ebx					;Saves address for the next key
 
 				mov edi, offset SBOX_R0
 				mov esi, offsettext
@@ -545,7 +584,7 @@ pushAD
 
 
 				mov esi, offsettext
-				inc esi
+				inc esi									;Start from second row.
 				call shiftRowsEncrypt						;(2)
 
 				mov edi, offset em
@@ -585,7 +624,7 @@ pushAD
 
 		mov edi, offsetkey
 		mov ebx, holdKeyIndex
-		call copyKeytoAllKeys
+		call copyKeytoAllKeys							;Save key
 		mov holdKeyIndex, ebx
 
 		mov esi, offsettext
@@ -601,11 +640,12 @@ Encrypt Endp
 
 Decrypt proc text:PTR byte, key: PTR byte, len:Dword
 pushAD
-		mov eax, text
-		mov offsetText, eax
-
 		mov eax, key
 		mov offsetKey, eax
+		call generateAllKeys
+
+		mov eax, text
+		mov offsetText, eax
 
 		sub holdKeyIndex, 10h
 		mov edi, holdKeyIndex				;Previously saved key.
